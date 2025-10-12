@@ -1,0 +1,11 @@
+#N canvas 579 39 1341 984 12;
+#X obj 216 372 output~;
+#X obj 289 230 osc~ 330;
+#X obj 162 223 osc~ 220;
+#X obj 213 288 +~;
+#X obj 134 14 loadbang;
+#X msg 134 37 330;
+#X connect 1 0 3 1;
+#X connect 2 0 3 0;
+#X connect 3 0 0 0;
+#X connect 4 0 5 0;
