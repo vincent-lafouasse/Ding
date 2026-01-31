@@ -2,6 +2,7 @@
 
 #include "JuceHeader.h"
 
+// rotating a phasor around the unit circle using a rotation matrix
 struct SineOscillator {
     float sinv = 0.0f;
     float cosv = 1.0f;
