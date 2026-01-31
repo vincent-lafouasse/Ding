@@ -12,12 +12,15 @@ template <std::size_t nChannels, typename FloatType>
 class Integrator {
    public:
     Integrator(FloatType inertia_weight, FloatType forward_weight)
-        : inertia_weight_(inertia_weight), forward_weight_(forward_weight) {}
+        : inertia_weight_(inertia_weight), forward_weight_(forward_weight)
+    {
+    }
     ~Integrator() = default;
 
     void setTarget(FloatType target) { this->target_ = target; }
 
-    FloatType get(std::size_t channel) {
+    FloatType get(std::size_t channel)
+    {
         memory_[channel] =
             inertia_weight_ * memory_[channel] + forward_weight_ * target_;
         return memory_[channel];

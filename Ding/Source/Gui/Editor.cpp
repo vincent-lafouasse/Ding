@@ -23,7 +23,8 @@ DingEditor::DingEditor(DingProcessor& p)
       audioProcessor(p),
       volume_label("VolumeLabel", "Volume"),
       keyboardComponent(p.keyboardState,
-                        KeyboardComponentBase::horizontalKeyboard) {
+                        KeyboardComponentBase::horizontalKeyboard)
+{
     setSize(screenWidth, screenHeight);
 
     this->setupKeyboard();
@@ -33,7 +34,8 @@ DingEditor::DingEditor(DingProcessor& p)
 
 DingEditor::~DingEditor() = default;
 
-void DingEditor::setupKeyboard() {
+void DingEditor::setupKeyboard()
+{
     addAndMakeVisible(keyboardComponent);
     keyboardComponent.setBlackNoteLengthProportion(0.6f);
 
@@ -42,7 +44,8 @@ void DingEditor::setupKeyboard() {
     keyboardComponent.setOctaveForMiddleC(4);
 }
 
-void DingEditor::setupGainKnob() {
+void DingEditor::setupGainKnob()
+{
     this->volume_attachment =
         std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
             audioProcessor.params, DingProcessor::volume_id, this->volume_knob);
@@ -65,7 +68,8 @@ void DingEditor::setupGainKnob() {
     volume_label.setJustificationType(juce::Justification::centred);
 }
 
-void DingEditor::resized() {
+void DingEditor::resized()
+{
     juce::Rectangle<int> area = getLocalBounds();
 
     auto keyboardPanel = area.removeFromRight(keyboardWidth);
@@ -77,7 +81,8 @@ void DingEditor::resized() {
     volume_knob.setBounds(sidePanel);
 }
 
-juce::String VolumeKnob::getTextFromValue(const double value) {
+juce::String VolumeKnob::getTextFromValue(const double value)
+{
     std::stringstream ss{};
     ss << std::fixed;
     ss << std::setprecision(1);
@@ -85,13 +90,15 @@ juce::String VolumeKnob::getTextFromValue(const double value) {
     return ss.str();
 }
 
-void DingEditor::timerCallback() {
+void DingEditor::timerCallback()
+{
     this->keyboardComponent.grabKeyboardFocus();
     this->stopTimer();
 }
 
 //==============================================================================
-void DingEditor::paint(juce::Graphics& g) {
+void DingEditor::paint(juce::Graphics& g)
+{
     // (Our component is opaque, so we must completely fill the background with
     // a solid colour)
     g.fillAll(

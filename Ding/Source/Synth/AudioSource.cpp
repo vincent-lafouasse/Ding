@@ -3,7 +3,8 @@
 #include "Voice.hpp"
 
 SynthAudioSource::SynthAudioSource(juce::MidiKeyboardState& keyboard_state)
-    : keyboardState(keyboard_state) {
+    : keyboardState(keyboard_state)
+{
     constexpr int nVoices = 6;
     for (int _ = 0; _ < nVoices; ++_) {
         synth.addVoice(new Voice());
@@ -12,14 +13,16 @@ SynthAudioSource::SynthAudioSource(juce::MidiKeyboardState& keyboard_state)
 }
 
 void SynthAudioSource::prepareToPlay(int /*samplesPerBlockExpected*/,
-                                     double sampleRate) {
+                                     double sampleRate)
+{
     synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void SynthAudioSource::releaseResources() {}
 
 void SynthAudioSource::getNextAudioBlock(
-    const AudioSourceChannelInfo& bufferToFill) {
+    const AudioSourceChannelInfo& bufferToFill)
+{
     bufferToFill.clearActiveBufferRegion();
     juce::MidiBuffer incomingMidi;
     keyboardState.processNextMidiBuffer(incomingMidi, bufferToFill.startSample,

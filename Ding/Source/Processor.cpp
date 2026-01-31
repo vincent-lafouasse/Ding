@@ -16,7 +16,8 @@ const std::string DingProcessor::volume_id = "volume";
 const std::string DingProcessor::volume_name = "Volume";
 
 AudioProcessorValueTreeState::ParameterLayout
-DingProcessor::createParameterLayout() {
+DingProcessor::createParameterLayout()
+{
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     auto volume_parameter = std::make_unique<AudioParameterFloat>(
@@ -39,14 +40,16 @@ DingProcessor::DingProcessor()
              nullptr,
              "PARAMETERS",
              DingProcessor::createParameterLayout()),
-      synthSource(this->keyboardState) {
+      synthSource(this->keyboardState)
+{
     static_assert(std::atomic<float>::is_always_lock_free);
 }
 
 DingProcessor::~DingProcessor() = default;
 
 void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                 juce::MidiBuffer& /*midiBuffer*/) {
+                                 juce::MidiBuffer& /*midiBuffer*/)
+{
     this->synthSource.getNextAudioBlock(
         juce::AudioSourceChannelInfo(&buffer, 0, buffer.getNumSamples()));
 
@@ -69,57 +72,69 @@ void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 }
 
 void DingProcessor::prepareToPlay(const double sampleRate,
-                                  const int samplesPerBlock) {
+                                  const int samplesPerBlock)
+{
     this->synthSource.prepareToPlay(samplesPerBlock, sampleRate);
 }
 
-void DingProcessor::releaseResources() {
+void DingProcessor::releaseResources()
+{
     this->synthSource.releaseResources();
 }
 
 //================== boiler plate =============================================
 
-const juce::String DingProcessor::getName() const {
+const juce::String DingProcessor::getName() const
+{
     return JucePlugin_Name;
 }
 
-bool DingProcessor::acceptsMidi() const {
+bool DingProcessor::acceptsMidi() const
+{
     return true;
 }
 
-bool DingProcessor::producesMidi() const {
+bool DingProcessor::producesMidi() const
+{
     return false;
 }
 
-bool DingProcessor::isMidiEffect() const {
+bool DingProcessor::isMidiEffect() const
+{
     return false;
 }
 
-double DingProcessor::getTailLengthSeconds() const {
+double DingProcessor::getTailLengthSeconds() const
+{
     return 0.0;
 }
 
-int DingProcessor::getNumPrograms() {
+int DingProcessor::getNumPrograms()
+{
     return 1;  // NB: some hosts don't cope very well if you tell them there are
                // 0 programs, so this should be at least 1, even if you're not
                // really implementing programs.
 }
 
-int DingProcessor::getCurrentProgram() {
+int DingProcessor::getCurrentProgram()
+{
     return 0;
 }
 
-void DingProcessor::setCurrentProgram(const int index) {
+void DingProcessor::setCurrentProgram(const int index)
+{
     (void)index;
 }
 
-const juce::String DingProcessor::getProgramName(const int index) {
+const juce::String DingProcessor::getProgramName(const int index)
+{
     (void)index;
     return "Ding";
 }
 
 void DingProcessor::changeProgramName(const int index,
-                                      const juce::String& newName) {
+                                      const juce::String& newName)
+{
     (void)index;
     (void)newName;
 }
@@ -127,32 +142,36 @@ void DingProcessor::changeProgramName(const int index,
 //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool DingProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
+bool DingProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
     return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
 }
 #endif
 
 //==============================================================================
 
-bool DingProcessor::hasEditor() const {
+bool DingProcessor::hasEditor() const
+{
     return true;  // (change this to false if you choose to not supply an
                   // editor)
 }
 
-juce::AudioProcessorEditor* DingProcessor::createEditor() {
+juce::AudioProcessorEditor* DingProcessor::createEditor()
+{
     return new DingEditor(*this);
 }
 
 //==============================================================================
-void DingProcessor::getStateInformation(juce::MemoryBlock& destData) {
+void DingProcessor::getStateInformation(juce::MemoryBlock& destData)
+{
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
     (void)destData;
 }
 
-void DingProcessor::setStateInformation(const void* data,
-                                        const int sizeInBytes) {
+void DingProcessor::setStateInformation(const void* data, const int sizeInBytes)
+{
     // You should use this method to restore your parameters from this memory
     // block, whose contents will have been created by the getStateInformation()
     // call.
@@ -162,6 +181,7 @@ void DingProcessor::setStateInformation(const void* data,
 
 //==============================================================================
 // This creates new instances of the plugin...
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
     return new DingProcessor();
 }
