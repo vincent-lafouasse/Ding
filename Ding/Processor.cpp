@@ -72,12 +72,11 @@ void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
             std::memory_order_relaxed);
 
     for (auto i = 0; i < nSamples; ++i) {
+        this->masterVolume =
+            targetVolume +
+            this->volumeCoeff * (this->masterVolume - targetVolume);
         leftChannel[i] *= this->masterVolume;
         rightChannel[i] *= this->masterVolume;
-
-        if (!juce::approximatelyEqual(targetVolume, this->masterVolume)) {
-            this->masterVolume = 0.5f * (targetVolume + this->masterVolume);
-        }
     }
 }
 
@@ -85,6 +84,10 @@ void DingProcessor::prepareToPlay(const double sampleRate,
                                   const int /* samplesPerBlock */)
 {
     this->synth.setCurrentPlaybackSampleRate(sampleRate);
+
+    const float smoothingTime = 0.02f;  // 20 ms
+    this->volumeCoeff =
+        std::exp(-1.0f / (smoothingTime * static_cast<float>(sampleRate)));
 }
 
 void DingProcessor::releaseResources() {}

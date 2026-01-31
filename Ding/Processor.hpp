@@ -57,7 +57,8 @@ class DingProcessor final : public juce::AudioProcessor
 
    private:
     juce::Synthesiser synth;
-    float masterVolume{};
+    float masterVolume = 1.0f;
+    float volumeCoeff = 0.0f;
 
    public:
     static const std::string volume_id;
