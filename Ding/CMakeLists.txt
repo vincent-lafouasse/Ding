@@ -19,19 +19,19 @@ juce_add_plugin("${TargetName}"
 juce_generate_juce_header(${TargetName})
 
 target_sources(${TargetName} PRIVATE
-        Source/Processor.cpp
-        Source/Processor.hpp
-        Source/Integrator.hpp
+        Processor.cpp
+        Processor.hpp
+        Integrator.hpp
 
-	Source/Synth/Voice.cpp
-	Source/Synth/Voice.hpp
+        Synth/Voice.cpp
+        Synth/Voice.hpp
 
-	Source/Gui/Editor.cpp
-	Source/Gui/Editor.hpp
+        Gui/Editor.cpp
+        Gui/Editor.hpp
 )
 
 target_include_directories(${TargetName} PUBLIC
-	./Source
+        .
 )
 
 target_compile_definitions(${TargetName}
