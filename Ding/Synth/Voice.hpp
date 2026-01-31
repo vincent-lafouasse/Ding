@@ -6,8 +6,8 @@
 //
 // std::sin is slower and we don't need "random access" anyways
 //
-// float rounding errors lead result to eventually leave the unit circle so a
-// renorm from time to time is needed
+// float rounding errors lead the phasor to eventually leave the unit circle so
+// a renorm from time to time is needed
 struct SineOscillator {
     // vector [x y]
     float cosv = 1.0f;
