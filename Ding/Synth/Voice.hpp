@@ -3,12 +3,21 @@
 #include "JuceHeader.h"
 
 // rotating a phasor around the unit circle using a rotation matrix
+//
+// std::sin is slower and we don't need "random access" anyways
+//
+// float rounding errors lead result to eventually leave the unit circle so a
+// renorm from time to time is needed
 struct SineOscillator {
     float sinv = 0.0f;
     float cosv = 1.0f;
 
     float sinInc = 0.0f;
     float cosInc = 1.0f;
+
+    size_t renorm_timer = 0;
+    static constexpr size_t renorm_timer_mask =
+        0xff;  // renorm every 256 samples
 
     void setFrequency(float freq, double sampleRate)
     {
@@ -22,6 +31,7 @@ struct SineOscillator {
     {
         sinv = 0.0f;
         cosv = 1.0f;
+        renorm_timer = 0;
     }
 
     float process()
@@ -33,6 +43,14 @@ struct SineOscillator {
 
         sinv = s;
         cosv = c;
+
+        if ((renorm_timer & renorm_timer_mask) == 0) {
+            const float norm = std::sqrt(s * s + c * c);
+            sinv /= norm;
+            cosv /= norm;
+            renorm_timer = 0;
+        }
+        renorm_timer++;
 
         return out;
     }
