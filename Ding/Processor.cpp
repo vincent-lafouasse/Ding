@@ -44,7 +44,7 @@ DingProcessor::DingProcessor()
 {
     static_assert(std::atomic<float>::is_always_lock_free);
 
-    constexpr int nVoices = 6;
+    constexpr int nVoices = 16;
     for (int _ = 0; _ < nVoices; ++_) {
         this->synth.addVoice(new Voice());
     }
