@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Integrator.hpp"
 #include "JuceHeader.h"
-#include "Synth/AudioSource.hpp"
 
 //==============================================================================
 /**
@@ -58,7 +56,7 @@ class DingProcessor final : public juce::AudioProcessor
     juce::MidiKeyboardState keyboardState{};
 
    private:
-    SynthAudioSource synthSource;
+    juce::Synthesiser synth;
     float masterVolume{};
 
    public:

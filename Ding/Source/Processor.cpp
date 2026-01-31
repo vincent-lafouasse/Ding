@@ -7,8 +7,9 @@
 */
 
 #include "Processor.hpp"
+
 #include "Gui/Editor.hpp"
-#include "Synth/AudioSource.hpp"
+#include "Synth/Voice.hpp"
 
 #include <cassert>
 
@@ -39,21 +40,30 @@ DingProcessor::DingProcessor()
       params(*this,
              nullptr,
              "PARAMETERS",
-             DingProcessor::createParameterLayout()),
-      synthSource(this->keyboardState)
+             DingProcessor::createParameterLayout())
 {
     static_assert(std::atomic<float>::is_always_lock_free);
+
+    constexpr int nVoices = 6;
+    for (int _ = 0; _ < nVoices; ++_) {
+        this->synth.addVoice(new Voice());
+    }
+    this->synth.addSound(new SynthSound());
 }
 
 DingProcessor::~DingProcessor() = default;
 
 void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                 juce::MidiBuffer& /*midiBuffer*/)
+                                 juce::MidiBuffer& midiBuffer)
 {
-    this->synthSource.getNextAudioBlock(
-        juce::AudioSourceChannelInfo(&buffer, 0, buffer.getNumSamples()));
+    const auto nSamples = buffer.getNumSamples();
 
-    const auto numSamples = buffer.getNumSamples();
+    buffer.clear();
+
+    keyboardState.processNextMidiBuffer(midiBuffer, 0, nSamples, true);
+
+    synth.renderNextBlock(buffer, midiBuffer, 0, buffer.getNumSamples());
+
     auto* leftChannel = buffer.getWritePointer(0);
     auto* rightChannel = buffer.getWritePointer(1);
 
@@ -61,7 +71,7 @@ void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         this->params.getRawParameterValue(volume_id)->load(
             std::memory_order_relaxed);
 
-    for (auto i = 0; i < numSamples; ++i) {
+    for (auto i = 0; i < nSamples; ++i) {
         leftChannel[i] *= this->masterVolume;
         rightChannel[i] *= this->masterVolume;
 
@@ -72,15 +82,12 @@ void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 }
 
 void DingProcessor::prepareToPlay(const double sampleRate,
-                                  const int samplesPerBlock)
+                                  const int /* samplesPerBlock */)
 {
-    this->synthSource.prepareToPlay(samplesPerBlock, sampleRate);
+    this->synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
-void DingProcessor::releaseResources()
-{
-    this->synthSource.releaseResources();
-}
+void DingProcessor::releaseResources() {}
 
 //================== boiler plate =============================================
 
