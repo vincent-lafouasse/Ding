@@ -9,22 +9,25 @@
 // float rounding errors lead result to eventually leave the unit circle so a
 // renorm from time to time is needed
 struct SineOscillator {
-    float sinv = 0.0f;
+    // vector [x y]
     float cosv = 1.0f;
+    float sinv = 0.0f;
 
+    // rotation matrix coefficients
+    // cos th; -sin th
+    // sin th;  cos th
     float sinInc = 0.0f;
     float cosInc = 1.0f;
 
     size_t renorm_timer = 0;
-    static constexpr size_t renorm_timer_mask =
-        0xff;  // renorm every 256 samples
+    static constexpr size_t renorm_threshold = 256;  // renorm every _ samples
 
     void setFrequency(float freq, double sampleRate)
     {
-        const float w =
+        const float phase_increment =
             juce::MathConstants<float>::twoPi * freq / (float)sampleRate;
-        sinInc = std::sin(w);
-        cosInc = std::cos(w);
+        cosInc = std::cos(phase_increment);
+        sinInc = std::sin(phase_increment);
     }
 
     void reset()
@@ -38,20 +41,22 @@ struct SineOscillator {
     {
         const float out = sinv;
 
-        const float s = sinv * cosInc + cosv * sinInc;
+        // matrix multiplication
+        // c[n+1] = cosInc; -sinInc  x  c[n]
+        // s[n+1]   sinInc;  cosInc     s[n]
         const float c = cosv * cosInc - sinv * sinInc;
+        const float s = sinv * cosInc + cosv * sinInc;
 
-        sinv = s;
         cosv = c;
+        sinv = s;
 
-        if ((renorm_timer & renorm_timer_mask) == 0) {
+        renorm_timer++;
+        if (renorm_timer >= renorm_threshold) {
             const float norm = std::sqrt(s * s + c * c);
             sinv /= norm;
             cosv /= norm;
             renorm_timer = 0;
         }
-        renorm_timer++;
-
         return out;
     }
 };
