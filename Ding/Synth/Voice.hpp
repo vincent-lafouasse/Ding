@@ -2,6 +2,41 @@
 
 #include "JuceHeader.h"
 
+struct SineOscillator {
+    float sinv = 0.0f;
+    float cosv = 1.0f;
+
+    float sinInc = 0.0f;
+    float cosInc = 1.0f;
+
+    void setFrequency(float freq, double sampleRate)
+    {
+        const float w =
+            juce::MathConstants<float>::twoPi * freq / (float)sampleRate;
+        sinInc = std::sin(w);
+        cosInc = std::cos(w);
+    }
+
+    void reset()
+    {
+        sinv = 0.0f;
+        cosv = 1.0f;
+    }
+
+    float process()
+    {
+        const float out = sinv;
+
+        const float s = sinv * cosInc + cosv * sinInc;
+        const float c = cosv * cosInc - sinv * sinInc;
+
+        sinv = s;
+        cosv = c;
+
+        return out;
+    }
+};
+
 class SynthSound final : public juce::SynthesiserSound {
    public:
     SynthSound() = default;
@@ -12,7 +47,7 @@ class SynthSound final : public juce::SynthesiserSound {
 
 class Voice final : public juce::SynthesiserVoice {
    public:
-    Voice();
+    Voice() = default;
     void renderNextBlock(AudioBuffer<float>& outputBuffer,
                          int startSample,
                          int numSamples) override;
@@ -31,9 +66,7 @@ class Voice final : public juce::SynthesiserVoice {
     bool canPlaySound(juce::SynthesiserSound* sound) override;
 
    private:
-    double phase{};
-    double phaseIncrement{};
-    double level{};
-    double tailOff{};
-    double sampleRate;
+    SineOscillator osc;
+    juce::ADSR adsr;
+    float level = 0.0f;
 };

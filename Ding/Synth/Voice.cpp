@@ -1,94 +1,59 @@
 #include "Voice.hpp"
 
-namespace {
-template <typename NumericType>
-void wrapping_add(NumericType& value, NumericType addend, NumericType limit)
-{
-    value += addend;
-    while (value >= limit) {
-        value -= limit;
-    }
-}
-}  // namespace
-
-Voice::Voice() : sampleRate(48000) {}
-
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
-    this->sampleRate = newRate;
+    this->adsr.setSampleRate(newRate);
+
+    juce::ADSR::Parameters p;
+    p.attack = 0.005f;
+    p.decay = 0.0f;
+    p.sustain = 1.0f;
+    p.release = 0.1f;
+
+    adsr.setParameters(p);
 }
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {
-    if (this->phaseIncrement == 0.0)
+    if (!adsr.isActive()) {
+        clearCurrentNote();
         return;
+    }
 
-    const auto nChannels = outputBuffer.getNumChannels();
+    const int channels = outputBuffer.getNumChannels();
 
-    if (this->tailOff != 0.0) {
-        // decaying
-        for (int i = 0; i < numSamples; i++) {
-            const float sine = static_cast<float>(this->tailOff * this->level *
-                                                  std::sin(this->phase));
-            wrapping_add(this->phase, this->phaseIncrement,
-                         juce::MathConstants<double>::twoPi);
+    for (int i = 0; i < numSamples; ++i) {
+        const float env = adsr.getNextSample();
+        const float s = osc.process() * env * level;
 
-            for (auto channel = 0; channel < nChannels; ++channel) {
-                outputBuffer.addSample(channel, startSample + i, sine);
-            }
-
-            this->tailOff *= 0.99;  // exponential decay
-
-            if (this->tailOff < 0.05) {
-                this->clearCurrentNote();
-                this->phaseIncrement = 0.0;
-                return;
-            }
-        }
-    } else {
-        // regular buffer
-        for (int i = 0; i < numSamples; i++) {
-            const float sine =
-                static_cast<float>(this->level * std::sin(this->phase));
-            wrapping_add(this->phase, this->phaseIncrement,
-                         juce::MathConstants<double>::twoPi);
-
-            for (auto channel = 0; channel < nChannels; ++channel) {
-                outputBuffer.addSample(channel, startSample + i, sine);
-            }
-        }
+        for (int ch = 0; ch < channels; ++ch)
+            outputBuffer.addSample(ch, startSample + i, s);
     }
 }
 
 void Voice::startNote(const int midiNote,
                       const float velocity,
-                      juce::SynthesiserSound* sound,
+                      juce::SynthesiserSound* /* sound */,
                       const int /*pitchWheelPosition*/)
 {
-    (void)sound;
+    const auto freq =
+        static_cast<float>(juce::MidiMessage::getMidiNoteInHertz(midiNote));
 
-    this->phase = 0.0f;
-    this->level = 0.15 * velocity;
-    this->tailOff = 0.0;
+    osc.setFrequency(freq, getSampleRate());
+    osc.reset();
 
-    const double frequency = juce::MidiMessage::getMidiNoteInHertz(midiNote);
-    this->phaseIncrement =
-        frequency * juce::MathConstants<float>::twoPi / this->sampleRate;
+    level = velocity;
+    adsr.noteOn();
 }
 
-void Voice::stopNote(const float velocity, const bool allowTailOff)
+void Voice::stopNote(const float /* velocity */, const bool allowTailOff)
 {
-    (void)velocity;
-
     if (allowTailOff) {
-        if (this->tailOff == 0.0) {
-            this->tailOff = 1.0;
-        }
+        adsr.noteOff();
     } else {
-        this->clearCurrentNote();
-        this->phaseIncrement = 0.0;
+        clearCurrentNote();
     }
 }
 
