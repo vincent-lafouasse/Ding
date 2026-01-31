@@ -21,7 +21,6 @@ juce_generate_juce_header(${TargetName})
 target_sources(${TargetName} PRIVATE
         Processor.cpp
         Processor.hpp
-        Integrator.hpp
 
         Synth/Voice.cpp
         Synth/Voice.hpp
