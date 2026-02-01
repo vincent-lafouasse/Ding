@@ -19,6 +19,8 @@ struct SineOscillator {
     // rotation matrix coefficients
     // cos th; -sin th
     // sin th;  cos th
+    //
+    // default value is I_2
     float m_sinInc = 0.0f;
     float m_cosInc = 1.0f;
 
