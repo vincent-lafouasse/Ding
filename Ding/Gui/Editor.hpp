@@ -29,16 +29,14 @@ class DingEditor final : public juce::AudioProcessorEditor, public juce::Timer {
     void setupKeyboard();
 
    private:
-    DingProcessor& audioProcessor;
+    DingProcessor& m_audioProcessor;
 
-    VolumeKnob volume_knob;
-    juce::Label volume_label;
-
-    juce::MidiKeyboardComponent keyboardComponent;
-
-   public:
+    VolumeKnob m_volume_knob;
+    juce::Label m_volume_label;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>
-        volume_attachment;
+        m_volume_attachment;
+
+    juce::MidiKeyboardComponent m_keyboardComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DingEditor)
 };

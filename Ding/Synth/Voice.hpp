@@ -40,8 +40,9 @@ class Voice final : public juce::SynthesiserVoice {
     bool canPlaySound(juce::SynthesiserSound* sound) override;
 
    private:
-    static constexpr std::size_t nModes = GlockenspielModalData::nModes;
-    std::array<SineOscillator, nModes> oscillators;
-    juce::ADSR adsr;
-    float velocity = 0.0f;
+    static constexpr std::size_t s_nModes = GlockenspielModalData::nModes;
+
+    std::array<SineOscillator, s_nModes> m_oscillators;
+    juce::ADSR m_adsr;
+    float m_velocity = 0.0f;
 };

@@ -14,7 +14,7 @@ static constexpr std::array<float, nModes> frequencyRatios = {
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
-    this->adsr.setSampleRate(newRate);
+    m_adsr.setSampleRate(newRate);
 
     juce::ADSR::Parameters p;
     p.attack = 0.005f;
@@ -22,14 +22,14 @@ void Voice::setCurrentPlaybackSampleRate(double newRate)
     p.sustain = 0.0f;
     p.release = 0.5f;
 
-    adsr.setParameters(p);
+    m_adsr.setParameters(p);
 }
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {
-    if (!adsr.isActive()) {
+    if (!m_adsr.isActive()) {
         clearCurrentNote();
         return;
     }
@@ -40,12 +40,12 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
         auto sumModes = [](const float sum, auto& osc) {
             return sum + osc.process();
         };
-        const float total = std::accumulate(oscillators.begin(),
-                                            oscillators.end(), 0.0f, sumModes);
-        const float sample = total / static_cast<float>(nModes);
+        const float total = std::accumulate(
+            m_oscillators.begin(), m_oscillators.end(), 0.0f, sumModes);
+        const float sample = total / static_cast<float>(s_nModes);
 
-        const float env = adsr.getNextSample();
-        const float s = sample * env * velocity;
+        const float env = m_adsr.getNextSample();
+        const float s = sample * env * m_velocity;
 
         for (int ch = 0; ch < channels; ++ch)
             outputBuffer.addSample(ch, startSample + i, s);
@@ -53,29 +53,29 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
 }
 
 void Voice::startNote(const int midiNote,
-                      const float _velocity,
+                      const float velocity,
                       juce::SynthesiserSound* /* sound */,
                       const int /*pitchWheelPosition*/)
 {
     const auto fundamental =
         static_cast<float>(juce::MidiMessage::getMidiNoteInHertz(midiNote));
 
-    const std::array<float, nModes>& ratios =
+    const std::array<float, s_nModes>& ratios =
         GlockenspielModalData::frequencyRatios;
 
-    for (std::size_t i = 0; i < nModes; i++) {
-        oscillators[i].setFrequency(fundamental * ratios[i], getSampleRate());
-        oscillators[i].reset();
+    for (std::size_t i = 0; i < s_nModes; i++) {
+        m_oscillators[i].setFrequency(fundamental * ratios[i], getSampleRate());
+        m_oscillators[i].reset();
     }
 
-    velocity = _velocity;
-    adsr.noteOn();
+    m_velocity = velocity;
+    m_adsr.noteOn();
 }
 
 void Voice::stopNote(const float /* velocity */, const bool allowTailOff)
 {
     if (allowTailOff) {
-        adsr.noteOff();
+        m_adsr.noteOff();
     } else {
         clearCurrentNote();
     }

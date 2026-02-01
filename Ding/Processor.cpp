@@ -13,8 +13,8 @@
 
 #include <cassert>
 
-const std::string DingProcessor::volume_id = "volume";
-const std::string DingProcessor::volume_name = "Volume";
+const std::string DingProcessor::s_volume_id = "volume";
+const std::string DingProcessor::s_volume_name = "Volume";
 
 AudioProcessorValueTreeState::ParameterLayout
 DingProcessor::createParameterLayout()
@@ -22,8 +22,7 @@ DingProcessor::createParameterLayout()
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     auto volume_parameter = std::make_unique<AudioParameterFloat>(
-        DingProcessor::volume_id, DingProcessor::volume_name,
-        NormalisableRange<float>(0.0f, 1.0f), 0.5f);
+        s_volume_id, s_volume_name, NormalisableRange<float>(0.0f, 1.0f), 0.5f);
     params.push_back(std::move(volume_parameter));
 
     return {params.begin(), params.end()};
@@ -37,18 +36,18 @@ DingProcessor::DingProcessor()
                                        true))
 
       ,
-      params(*this,
-             nullptr,
-             "PARAMETERS",
-             DingProcessor::createParameterLayout())
+      m_params(*this,
+               nullptr,
+               "PARAMETERS",
+               DingProcessor::createParameterLayout())
 {
     static_assert(std::atomic<float>::is_always_lock_free);
 
     constexpr int nVoices = 16;
     for (int _ = 0; _ < nVoices; ++_) {
-        this->synth.addVoice(new Voice());
+        m_synth.addVoice(new Voice());
     }
-    this->synth.addSound(new SynthSound());
+    m_synth.addSound(new SynthSound());
 }
 
 DingProcessor::~DingProcessor() = default;
@@ -60,33 +59,31 @@ void DingProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     buffer.clear();
 
-    keyboardState.processNextMidiBuffer(midiBuffer, 0, nSamples, true);
+    m_keyboardState.processNextMidiBuffer(midiBuffer, 0, nSamples, true);
 
-    synth.renderNextBlock(buffer, midiBuffer, 0, buffer.getNumSamples());
+    m_synth.renderNextBlock(buffer, midiBuffer, 0, buffer.getNumSamples());
 
     auto* leftChannel = buffer.getWritePointer(0);
     auto* rightChannel = buffer.getWritePointer(1);
 
-    const float targetVolume =
-        this->params.getRawParameterValue(volume_id)->load(
-            std::memory_order_relaxed);
+    const float targetVolume = m_params.getRawParameterValue(s_volume_id)
+                                   ->load(std::memory_order_relaxed);
 
     for (auto i = 0; i < nSamples; ++i) {
-        this->masterVolume =
-            targetVolume +
-            this->volumeCoeff * (this->masterVolume - targetVolume);
-        leftChannel[i] *= this->masterVolume;
-        rightChannel[i] *= this->masterVolume;
+        m_masterVolume =
+            targetVolume + m_volumeCoeff * (m_masterVolume - targetVolume);
+        leftChannel[i] *= m_masterVolume;
+        rightChannel[i] *= m_masterVolume;
     }
 }
 
 void DingProcessor::prepareToPlay(const double sampleRate,
                                   const int /* samplesPerBlock */)
 {
-    this->synth.setCurrentPlaybackSampleRate(sampleRate);
+    m_synth.setCurrentPlaybackSampleRate(sampleRate);
 
     const float smoothingTime = 0.02f;  // 20 ms
-    this->volumeCoeff =
+    m_volumeCoeff =
         std::exp(-1.0f / (smoothingTime * static_cast<float>(sampleRate)));
 }
 

@@ -20,65 +20,66 @@ constexpr int keyboardWidth = numWhiteKeys * keyWidth;
 //==============================================================================
 DingEditor::DingEditor(DingProcessor& p)
     : AudioProcessorEditor(&p),
-      audioProcessor(p),
-      volume_label("VolumeLabel", "Volume"),
-      keyboardComponent(p.keyboardState,
-                        KeyboardComponentBase::horizontalKeyboard)
+      m_audioProcessor(p),
+      m_volume_label("VolumeLabel", "Volume"),
+      m_keyboardComponent(p.m_keyboardState,
+                          KeyboardComponentBase::horizontalKeyboard)
 {
-    setSize(screenWidth, screenHeight);
+    setSize(::screenWidth, ::screenHeight);
 
-    this->setupKeyboard();
-    this->setupGainKnob();
-    this->startTimer(400);
+    setupKeyboard();
+    setupGainKnob();
+    startTimer(400);
 }
 
 DingEditor::~DingEditor() = default;
 
 void DingEditor::setupKeyboard()
 {
-    addAndMakeVisible(keyboardComponent);
-    keyboardComponent.setBlackNoteLengthProportion(0.6f);
+    addAndMakeVisible(m_keyboardComponent);
+    m_keyboardComponent.setBlackNoteLengthProportion(0.6f);
 
-    keyboardComponent.setAvailableRange(lowestNote, highestNote);
-    keyboardComponent.setKeyWidth(keyWidth);
-    keyboardComponent.setOctaveForMiddleC(4);
+    m_keyboardComponent.setAvailableRange(::lowestNote, ::highestNote);
+    m_keyboardComponent.setKeyWidth(::keyWidth);
+    m_keyboardComponent.setOctaveForMiddleC(4);
 }
 
 void DingEditor::setupGainKnob()
 {
-    this->volume_attachment =
+    m_volume_attachment =
         std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-            audioProcessor.params, DingProcessor::volume_id, this->volume_knob);
+            m_audioProcessor.m_params, DingProcessor::s_volume_id,
+            m_volume_knob);
 
-    addAndMakeVisible(volume_knob);
-    volume_knob.setSliderStyle(
+    addAndMakeVisible(m_volume_knob);
+    m_volume_knob.setSliderStyle(
         juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     constexpr int value_textbox_width = 100;
     constexpr int value_textbox_height = 25;
-    volume_knob.setTextBoxStyle(
+    m_volume_knob.setTextBoxStyle(
         juce::Slider::TextEntryBoxPosition::TextBoxBelow, true,
         value_textbox_width, value_textbox_height);
 
-    volume_knob.setDoubleClickReturnValue(true, 0.5);
+    m_volume_knob.setDoubleClickReturnValue(true, 0.5);
 
-    addAndMakeVisible(volume_label);
-    volume_label.setText("Volume", juce::dontSendNotification);
-    volume_label.setColour(juce::Label::textColourId,
-                           juce::Colours::lightgreen);
-    volume_label.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(m_volume_label);
+    m_volume_label.setText("Volume", juce::dontSendNotification);
+    m_volume_label.setColour(juce::Label::textColourId,
+                             juce::Colours::lightgreen);
+    m_volume_label.setJustificationType(juce::Justification::centred);
 }
 
 void DingEditor::resized()
 {
     juce::Rectangle<int> area = getLocalBounds();
 
-    auto keyboardPanel = area.removeFromRight(keyboardWidth);
+    auto keyboardPanel = area.removeFromRight(::keyboardWidth);
     auto sidePanel = area;
 
-    keyboardComponent.setBounds(keyboardPanel);
+    m_keyboardComponent.setBounds(keyboardPanel);
 
-    volume_label.setBounds(sidePanel.removeFromTop(24));
-    volume_knob.setBounds(sidePanel);
+    m_volume_label.setBounds(sidePanel.removeFromTop(24));
+    m_volume_knob.setBounds(sidePanel);
 }
 
 juce::String VolumeKnob::getTextFromValue(const double value)
@@ -92,8 +93,8 @@ juce::String VolumeKnob::getTextFromValue(const double value)
 
 void DingEditor::timerCallback()
 {
-    this->keyboardComponent.grabKeyboardFocus();
-    this->stopTimer();
+    m_keyboardComponent.grabKeyboardFocus();
+    stopTimer();
 }
 
 //==============================================================================

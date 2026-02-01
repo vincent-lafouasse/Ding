@@ -5,12 +5,7 @@
 //==============================================================================
 /**
  */
-class DingProcessor final : public juce::AudioProcessor
-#if JucePlugin_Enable_ARA
-    ,
-                            public juce::AudioProcessorARAExtension
-#endif
-{
+class DingProcessor final : public juce::AudioProcessor {
    public:
     //==============================================================================
     DingProcessor();
@@ -51,18 +46,18 @@ class DingProcessor final : public juce::AudioProcessor
 
     static AudioProcessorValueTreeState::ParameterLayout
     createParameterLayout();
-    juce::AudioProcessorValueTreeState params;
+    juce::AudioProcessorValueTreeState m_params;
 
-    juce::MidiKeyboardState keyboardState{};
+    juce::MidiKeyboardState m_keyboardState{};
 
    private:
-    juce::Synthesiser synth;
-    float masterVolume = 1.0f;
-    float volumeCoeff = 0.0f;
+    juce::Synthesiser m_synth;
+    float m_masterVolume = 1.0f;
+    float m_volumeCoeff = 0.0f;
 
    public:
-    static const std::string volume_id;
-    static const std::string volume_name;
+    static const std::string s_volume_id;
+    static const std::string s_volume_name;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DingProcessor)
 };

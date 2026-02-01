@@ -13,52 +13,52 @@
 // a renorm from time to time is needed
 struct SineOscillator {
     // vector [x y]
-    float cosv = 1.0f;
-    float sinv = 0.0f;
+    float m_cosv = 1.0f;
+    float m_sinv = 0.0f;
 
     // rotation matrix coefficients
     // cos th; -sin th
     // sin th;  cos th
-    float sinInc = 0.0f;
-    float cosInc = 1.0f;
+    float m_sinInc = 0.0f;
+    float m_cosInc = 1.0f;
 
-    size_t renorm_timer = 0;
-    static constexpr size_t renorm_threshold = 256;  // renorm every _ samples
+    size_t m_renormTimer = 0;
+    static constexpr size_t s_renormThreshold = 256;  // renorm every _ samples
 
     void setFrequency(float freq, double sampleRate)
     {
         const float phase_increment =
             juce::MathConstants<float>::twoPi * freq / (float)sampleRate;
-        cosInc = std::cos(phase_increment);
-        sinInc = std::sin(phase_increment);
+        m_cosInc = std::cos(phase_increment);
+        m_sinInc = std::sin(phase_increment);
     }
 
     void reset()
     {
-        sinv = 0.0f;
-        cosv = 1.0f;
-        renorm_timer = 0;
+        m_sinv = 0.0f;
+        m_cosv = 1.0f;
+        m_renormTimer = 0;
     }
 
     float process()
     {
-        const float out = sinv;
+        const float out = m_sinv;
 
         // matrix multiplication
-        // c[n+1] = cosInc; -sinInc  x  c[n]
-        // s[n+1]   sinInc;  cosInc     s[n]
-        const float c = cosv * cosInc - sinv * sinInc;
-        const float s = sinv * cosInc + cosv * sinInc;
+        // c[n+1] = m_cosInc; -m_sinInc  x  c[n]
+        // s[n+1]   m_sinInc;  m_cosInc     s[n]
+        const float c = m_cosv * m_cosInc - m_sinv * m_sinInc;
+        const float s = m_sinv * m_cosInc + m_cosv * m_sinInc;
 
-        cosv = c;
-        sinv = s;
+        m_cosv = c;
+        m_sinv = s;
 
-        renorm_timer++;
-        if (renorm_timer >= renorm_threshold) {
+        m_renormTimer++;
+        if (m_renormTimer >= s_renormThreshold) {
             const float norm = std::sqrt(s * s + c * c);
-            sinv /= norm;
-            cosv /= norm;
-            renorm_timer = 0;
+            m_sinv /= norm;
+            m_cosv /= norm;
+            m_renormTimer = 0;
         }
         return out;
     }
