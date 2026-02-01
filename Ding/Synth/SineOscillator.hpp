@@ -42,26 +42,24 @@ struct SineOscillator {
         m_renormTimer = 0;
     }
 
-    float process()
-    {
-        const float out = m_sinv;
+    float sin() const { return m_sinv; }
 
+    float cos() const { return m_cosv; }
+
+    void advance()
+    {
         // matrix multiplication
         // c[n+1] = m_cosInc; -m_sinInc  x  c[n]
         // s[n+1]   m_sinInc;  m_cosInc     s[n]
-        const float c = m_cosv * m_cosInc - m_sinv * m_sinInc;
-        const float s = m_sinv * m_cosInc + m_cosv * m_sinInc;
-
-        m_cosv = c;
-        m_sinv = s;
+        m_cosv = m_cosv * m_cosInc - m_sinv * m_sinInc;
+        m_sinv = m_sinv * m_cosInc + m_cosv * m_sinInc;
 
         m_renormTimer++;
         if (m_renormTimer >= s_renormThreshold) {
-            const float norm = std::sqrt(s * s + c * c);
+            const float norm = std::sqrt(m_sinv * m_sinv + m_cosv * m_cosv);
             m_sinv /= norm;
             m_cosv /= norm;
             m_renormTimer = 0;
         }
-        return out;
     }
 };

@@ -38,7 +38,9 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
 
     for (int i = 0; i < numSamples; ++i) {
         auto sumModes = [](const float sum, auto& osc) {
-            return sum + osc.process();
+            const float out = sum + osc.sin();
+            osc.advance();
+            return out;
         };
         const float total = std::accumulate(
             m_oscillators.begin(), m_oscillators.end(), 0.0f, sumModes);
