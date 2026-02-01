@@ -2,6 +2,16 @@
 
 #include <numeric>
 
+namespace GlockenspielModalData {
+static constexpr std::array<float, nModes> frequencyRatios = {
+    1.0f,
+    1.6602819426474196f,
+    2.324633618320352f,
+    2.9888043230078396f,
+    3.6529839071128363f,
+    4.338303692992025f};
+}
+
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
     this->adsr.setSampleRate(newRate);
@@ -49,6 +59,9 @@ void Voice::startNote(const int midiNote,
 {
     const auto fundamental =
         static_cast<float>(juce::MidiMessage::getMidiNoteInHertz(midiNote));
+
+    const std::array<float, nModes>& ratios =
+        GlockenspielModalData::frequencyRatios;
 
     for (std::size_t i = 0; i < nModes; i++) {
         oscillators[i].setFrequency(fundamental * ratios[i], getSampleRate());
