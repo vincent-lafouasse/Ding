@@ -35,7 +35,7 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
         const float sample = total / static_cast<float>(nModes);
 
         const float env = adsr.getNextSample();
-        const float s = sample * env * level;
+        const float s = sample * env * velocity;
 
         for (int ch = 0; ch < channels; ++ch)
             outputBuffer.addSample(ch, startSample + i, s);
@@ -43,7 +43,7 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
 }
 
 void Voice::startNote(const int midiNote,
-                      const float velocity,
+                      const float _velocity,
                       juce::SynthesiserSound* /* sound */,
                       const int /*pitchWheelPosition*/)
 {
@@ -55,7 +55,7 @@ void Voice::startNote(const int midiNote,
         oscillators[i].reset();
     }
 
-    level = velocity;
+    velocity = _velocity;
     adsr.noteOn();
 }
 
