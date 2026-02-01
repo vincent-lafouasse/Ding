@@ -7,11 +7,12 @@
 namespace GlockenspielModalData {
 static constexpr std::array<float, nModes> frequencyRatios = {
     1.0f,
-    1.6602819426474196f,
-    2.324633618320352f,
-    2.9888043230078396f,
-    3.6529839071128363f,
-    4.338303692992025f};
+    2.7565361290810895f,
+    5.403921459425173f,
+    8.932951281230347f,
+    13.34429142562536f,
+    18.820878932628247f,
+};
 
 static constexpr float decayMs = 1000.0f;
 }  // namespace GlockenspielModalData
