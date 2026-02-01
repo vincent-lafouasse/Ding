@@ -51,8 +51,11 @@ struct SineOscillator {
         // matrix multiplication
         // c[n+1] = m_cosInc; -m_sinInc  x  c[n]
         // s[n+1]   m_sinInc;  m_cosInc     s[n]
-        m_cosv = m_cosv * m_cosInc - m_sinv * m_sinInc;
-        m_sinv = m_sinv * m_cosInc + m_cosv * m_sinInc;
+        const float c = m_cosv * m_cosInc - m_sinv * m_sinInc;
+        const float s = m_sinv * m_cosInc + m_cosv * m_sinInc;
+
+        m_cosv = c;
+        m_sinv = s;
 
         m_renormTimer++;
         if (m_renormTimer >= s_renormThreshold) {
