@@ -8,9 +8,9 @@ void Voice::setCurrentPlaybackSampleRate(double newRate)
 
     juce::ADSR::Parameters p;
     p.attack = 0.005f;
-    p.decay = 0.0f;
-    p.sustain = 1.0f;
-    p.release = 0.1f;
+    p.decay = 1.0f;
+    p.sustain = 0.0f;
+    p.release = 0.5f;
 
     adsr.setParameters(p);
 }
