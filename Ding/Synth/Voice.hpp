@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "JuceHeader.h"
 
 #include "SineOscillator.hpp"
@@ -33,6 +35,13 @@ class Voice final : public juce::SynthesiserVoice {
     bool canPlaySound(juce::SynthesiserSound* sound) override;
 
    private:
+    static constexpr std::size_t nModes = 6;
+    static constexpr std::array<float, nModes> ratios = {1.0f,
+                                                         1.6602819426474196f,
+                                                         2.324633618320352f,
+                                                         2.9888043230078396f,
+                                                         3.6529839071128363f,
+                                                         4.338303692992025f};
     SineOscillator osc;
     juce::ADSR adsr;
     float level = 0.0f;
