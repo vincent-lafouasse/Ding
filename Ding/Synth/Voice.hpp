@@ -43,6 +43,8 @@ class Voice final : public juce::SynthesiserVoice {
     static constexpr std::size_t s_nModes = GlockenspielModalData::nModes;
 
     std::array<SineOscillator, s_nModes> m_oscillators;
-    juce::ADSR m_adsr;
-    float m_velocity = 0.0f;
+
+    // single decay
+    float m_decayCoeff = 1.0f;
+    float m_level = 0.0f;
 };

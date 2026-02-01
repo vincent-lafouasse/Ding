@@ -1,5 +1,7 @@
 #include "Voice.hpp"
 
+#include <cmath>
+#include <cstdio>
 #include <numeric>
 
 namespace GlockenspielModalData {
@@ -10,26 +12,45 @@ static constexpr std::array<float, nModes> frequencyRatios = {
     2.9888043230078396f,
     3.6529839071128363f,
     4.338303692992025f};
+
+static constexpr float decayMs = 1000.0f;
+}  // namespace GlockenspielModalData
+
+namespace {
+float fromDecibels(float db)
+{
+    return std::powf(10.0f, db / 20.0f);
 }
+
+static constexpr float silenceThresoldDecibel = -60.0f;
+static const float silenceThresold = ::fromDecibels(silenceThresoldDecibel);
+}  // namespace
+
+namespace {
+float computeDecayCoefficient(float decayMs, float sampleRate)
+{
+    // we're looking for k such that k^n = threshold with n = decaySeconds /
+    // sampleRate ie k = threshold^(1/n)
+    const float threshold = ::fromDecibels(-30.0f);
+
+    const float decaySamples = (decayMs / 1000.0f) * sampleRate;
+    const float decayCoeff = std::powf(threshold, 1.0f / decaySamples);
+
+    return decayCoeff;
+}
+}  // namespace
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
-    m_adsr.setSampleRate(newRate);
-
-    juce::ADSR::Parameters p;
-    p.attack = 0.005f;
-    p.decay = 1.0f;
-    p.sustain = 0.0f;
-    p.release = 0.5f;
-
-    m_adsr.setParameters(p);
+    m_decayCoeff = ::computeDecayCoefficient(GlockenspielModalData::decayMs,
+                                             static_cast<float>(newRate));
 }
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {
-    if (!m_adsr.isActive()) {
+    if (m_level <= ::silenceThresold) {
         clearCurrentNote();
         return;
     }
@@ -46,11 +67,13 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
             m_oscillators.begin(), m_oscillators.end(), 0.0f, sumModes);
         const float sample = total / static_cast<float>(s_nModes);
 
-        const float env = m_adsr.getNextSample();
-        const float s = sample * env * m_velocity;
+        const float s = sample * m_level;
 
-        for (int ch = 0; ch < channels; ++ch)
+        for (int ch = 0; ch < channels; ++ch) {
             outputBuffer.addSample(ch, startSample + i, s);
+        }
+
+        m_level *= m_decayCoeff;
     }
 }
 
@@ -70,17 +93,15 @@ void Voice::startNote(const int midiNote,
         m_oscillators[i].reset();
     }
 
-    m_velocity = velocity;
-    m_adsr.noteOn();
+    m_level = velocity;
 }
 
 void Voice::stopNote(const float /* velocity */, const bool allowTailOff)
 {
-    if (allowTailOff) {
-        m_adsr.noteOff();
-    } else {
+    if (!allowTailOff) {
         clearCurrentNote();
     }
+    // else renderBlock will take care of clearing the note
 }
 
 void Voice::pitchWheelMoved(const int newPitchWheelValue)
