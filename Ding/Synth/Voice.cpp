@@ -27,10 +27,12 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
     const int channels = outputBuffer.getNumChannels();
 
     for (int i = 0; i < numSamples; ++i) {
-        float sample = std::accumulate(
-            oscillators.begin(), oscillators.end(), 0.0f,
-            [](float sum, auto& osc) { return sum + osc.process(); });
-        sample /= static_cast<float>(nModes);
+        auto sumModes = [](const float sum, auto& osc) {
+            return sum + osc.process();
+        };
+        const float total = std::accumulate(oscillators.begin(),
+                                            oscillators.end(), 0.0f, sumModes);
+        const float sample = total / static_cast<float>(nModes);
 
         const float env = adsr.getNextSample();
         const float s = sample * env * level;
