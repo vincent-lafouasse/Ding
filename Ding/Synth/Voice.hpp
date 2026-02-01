@@ -42,7 +42,7 @@ class Voice final : public juce::SynthesiserVoice {
                                                          2.9888043230078396f,
                                                          3.6529839071128363f,
                                                          4.338303692992025f};
-    SineOscillator osc;
+    std::array<SineOscillator, nModes> oscillators;
     juce::ADSR adsr;
     float level = 0.0f;
 };
