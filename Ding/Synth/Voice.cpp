@@ -1,5 +1,7 @@
 #include "Voice.hpp"
 
+#include <numeric>
+
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
     this->adsr.setSampleRate(newRate);
@@ -25,10 +27,9 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
     const int channels = outputBuffer.getNumChannels();
 
     for (int i = 0; i < numSamples; ++i) {
-        float sample = 0;
-        for (std::size_t j = 0; j < nModes; j++) {
-            sample += oscillators[j].process();
-        }
+        float sample = std::accumulate(
+            oscillators.begin(), oscillators.end(), 0.0f,
+            [](float sum, auto& osc) { return sum + osc.process(); });
         sample /= static_cast<float>(nModes);
 
         const float env = adsr.getNextSample();
