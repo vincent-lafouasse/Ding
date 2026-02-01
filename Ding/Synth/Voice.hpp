@@ -17,6 +17,9 @@ class SynthSound final : public juce::SynthesiserSound {
 class Voice final : public juce::SynthesiserVoice {
    public:
     Voice() = default;
+    // this is effectively the constructor
+    void setCurrentPlaybackSampleRate(double newRate) override;
+
     void renderNextBlock(AudioBuffer<float>& outputBuffer,
                          int startSample,
                          int numSamples) override;
@@ -26,8 +29,6 @@ class Voice final : public juce::SynthesiserVoice {
                    juce::SynthesiserSound* sound,
                    int /*pitchWheelPosition*/) override;
     void stopNote(float velocity, bool allowTailOff) override;
-
-    void setCurrentPlaybackSampleRate(double newRate) override;
 
     void pitchWheelMoved(int newPitchWheelValue) override;
     void controllerMoved(int controllerNumber, int newControllerValue) override;
