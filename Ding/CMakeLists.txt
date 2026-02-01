@@ -25,7 +25,6 @@ target_sources(${TargetName} PRIVATE
         Synth/Voice.cpp
         Synth/Voice.hpp
         Synth/SineOscillator.hpp
-        Synth/ModalOscillator.hpp
 
         Gui/Editor.cpp
         Gui/Editor.hpp
