@@ -88,6 +88,8 @@ void Voice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {
+    // check the master decay env. for voice inactivity
+    // samples cannot be larger than m_level
     if (m_level <= impl::silenceThresold) {
         clearCurrentNote();
         return;
@@ -107,15 +109,16 @@ void Voice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
             mode.osc.advance();
             mode.level *= GlockenspielModalData::relativeDecays[i];
         }
-        sample *= impl::nModesInv;  // normalize using cached 1/N(modes)
+        sample *= impl::nModesInv;  // normalize using cached 1/N
+                                    // makes sure sample is in [0, 1]
 
+        // master decay enveloppe
         const float s = sample * m_level;
+        m_level *= m_decayCoeff;
 
         for (int ch = 0; ch < channels; ++ch) {
             outputBuffer.addSample(ch, startSample + sampleIdx, s);
         }
-
-        m_level *= m_decayCoeff;
     }
 }
 
