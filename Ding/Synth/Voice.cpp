@@ -58,6 +58,7 @@ float computeDecayCoefficient(float decayMs,
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
+    m_sampleRate = static_cast<float>(newRate);
     for (auto& osc : m_oscillators) {
         osc.setSampleRate(newRate);
     }
@@ -73,8 +74,8 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
     }
 
     const float decayMs = guiDecayMs.load(std::memory_order_relaxed);
-    m_decayCoeff = ::computeDecayCoefficient(decayMs, getSampleRate(),
-                                             ::guiDecayThreshold);
+    m_decayCoeff =
+        ::computeDecayCoefficient(decayMs, m_sampleRate, ::guiDecayThreshold);
 
     const int channels = outputBuffer.getNumChannels();
 

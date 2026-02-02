@@ -47,4 +47,8 @@ class Voice final : public juce::SynthesiserVoice {
     // single decay
     float m_decayCoeff = 1.0f;
     float m_level = 0.0f;
+
+    float m_sampleRate =
+        44100.0f;  // safeguard value but you should _really_  call
+                   // setCurrentPlaybackSampleRate before doing anything
 };
