@@ -27,6 +27,9 @@ target_sources(${TargetName} PRIVATE
 
         Gui/Editor.cpp
         Gui/Editor.hpp
+
+        core/DecibelLookup.hpp
+        core/DecibelLookupData.cpp
 )
 
 target_include_directories(${TargetName} PUBLIC

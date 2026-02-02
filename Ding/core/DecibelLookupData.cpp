@@ -1,6 +1,6 @@
-#include <array>
+#include "DecibelLookup.hpp"
 
-static constexpr std::array<float, 2048> db_lut_data = {
+constexpr std::array<float, 2048> DecibelLookup::data = {
     1.58489319e-05f,  //  -96.00 dB
     1.59454950e-05f,  //  -95.95 dB
     1.60426465e-05f,  //  -95.89 dB
