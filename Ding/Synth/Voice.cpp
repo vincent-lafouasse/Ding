@@ -75,8 +75,22 @@ static constexpr float nModesInv =
     1.0f / static_cast<float>(GlockenspielModalData::nModes);
 
 // glockenspiels plays pretty high
-// do not render stuff that will alias
-static constexpr float hfHardCutoff = 18000.0f;
+// hard cut LPF: do not render stuff that will alias
+// soft knee LPF: HF modes are hard to excite and decay very fast
+static constexpr float hfHardCutoff = 18.0f * 1000.0f;
+static constexpr float hfSoftKnee = 10.0f * 1000.0f;
+
+// std::expf is fine, this should only be called on NoteOn
+float hfAttenuation(float freq)
+{
+    (void)hfSoftKnee;
+
+    if (freq >= hfHardCutoff) {
+        return 0.0f;
+    } else {
+        return 1.0f;
+    }
+}
 }  // namespace impl
 }  // namespace
 
@@ -142,10 +156,10 @@ void Voice::startNote(const int midiNote,
         const float freq = fundamental * ratios[i];
         mode.osc.setFrequency(freq);
         mode.osc.reset();
-        // brickwall LPF
-        mode.level = (freq >= impl::hfHardCutoff)
-                         ? 0.0f
-                         : GlockenspielModalData::initialAmplitude[i];
+        // hard cut around 18kHz to avoid aliasing
+        // soft knee around 10kHz to attenuate the 10k-20k octave
+        mode.level = GlockenspielModalData::initialAmplitude[i] *
+                     impl::hfAttenuation(freq);
     }
 
     m_level = velocity;
