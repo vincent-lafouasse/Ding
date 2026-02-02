@@ -3,7 +3,6 @@
 #include <atomic>
 #include <cmath>
 #include <cstdio>
-#include <numeric>
 
 namespace GlockenspielModalData {
 static constexpr std::array<float, nModes> frequencyRatios = {
@@ -14,6 +13,22 @@ static constexpr std::array<float, nModes> frequencyRatios = {
     13.34429142562536f,
     18.820878932628247f,
 };
+
+// gets multiplied at each sample so these parameters act pretty aggressively
+// the simply supported beams at 22.4% select the first and fifth partials
+//
+// in a perfect world, the first and fifth partials ring out forever but they
+// actually lose energy to acoustic radiation (we hear them)
+static constexpr std::array<float, nModes> relativeDecays = {
+    1.0f, 0.95f, 0.9f, 0.7f, 1.0f, 0.5f,
+};
+
+// depends on the strike position
+// not implemented yet so 1.0f for everyone
+static constexpr std::array<float, nModes> initialAmplitude = {
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+};
+
 }  // namespace GlockenspielModalData
 
 namespace {
@@ -59,8 +74,8 @@ float computeDecayCoefficient(float decayMs,
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
     m_sampleRate = static_cast<float>(newRate);
-    for (auto& osc : m_oscillators) {
-        osc.setSampleRate(newRate);
+    for (auto& mode : m_modes) {
+        mode.osc.setSampleRate(newRate);
     }
 }
 
@@ -79,20 +94,20 @@ void Voice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
 
     const int channels = outputBuffer.getNumChannels();
 
-    for (int i = 0; i < numSamples; ++i) {
-        auto sumModes = [](const float sum, auto& osc) {
-            const float out = sum + osc.sin();
-            osc.advance();
-            return out;
-        };
-        const float total = std::accumulate(
-            m_oscillators.begin(), m_oscillators.end(), 0.0f, sumModes);
-        const float sample = total / static_cast<float>(s_nModes);
+    for (int sampleIdx = 0; sampleIdx < numSamples; ++sampleIdx) {
+        float sample = 0.0f;
+        for (std::size_t i = 0; i < s_nModes; i++) {
+            Mode& mode = m_modes[i];
+            sample += mode.osc.sin() * mode.level;
+            mode.osc.advance();
+            mode.level *= GlockenspielModalData::relativeDecays[i];
+        }
+        sample /= static_cast<float>(s_nModes);
 
         const float s = sample * m_level;
 
         for (int ch = 0; ch < channels; ++ch) {
-            outputBuffer.addSample(ch, startSample + i, s);
+            outputBuffer.addSample(ch, startSample + sampleIdx, s);
         }
 
         m_level *= m_decayCoeff;
@@ -111,8 +126,10 @@ void Voice::startNote(const int midiNote,
         GlockenspielModalData::frequencyRatios;
 
     for (std::size_t i = 0; i < s_nModes; i++) {
-        m_oscillators[i].setFrequency(fundamental * ratios[i]);
-        m_oscillators[i].reset();
+        Mode& mode = m_modes[i];
+        mode.osc.setFrequency(fundamental * ratios[i]);
+        mode.osc.reset();
+        mode.level = GlockenspielModalData::initialAmplitude[i];
     }
 
     m_level = velocity;
