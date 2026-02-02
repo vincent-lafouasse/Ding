@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_audio_processors/juce_audio_processors.h>
 
 //==============================================================================
 /**
@@ -44,7 +44,7 @@ class DingProcessor final : public juce::AudioProcessor {
     void setStateInformation(const void* data, int sizeInBytes) override;
     //==============================================================================
 
-    static AudioProcessorValueTreeState::ParameterLayout
+    static juce::AudioProcessorValueTreeState::ParameterLayout
     createParameterLayout();
     juce::AudioProcessorValueTreeState m_params;
 
