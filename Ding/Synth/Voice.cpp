@@ -19,6 +19,8 @@ static constexpr std::array<float, nModes> frequencyRatios = {
 //
 // in a perfect world, the first and fifth partials ring out forever but they
 // actually lose energy to acoustic radiation (i.e. we hear them)
+//
+// these should probably be physics based instead of randomly tuned
 static constexpr std::array<float, nModes> relativeDecays = {
     1.0f, 0.95f, 0.9f, 0.7f, 1.0f, 0.5f,
 };
