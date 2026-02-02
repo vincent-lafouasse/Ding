@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "JuceHeader.h"
+#include <juce_audio_basics/juce_audio_basics.h>
 
 #include "SineOscillator.hpp"
 
@@ -24,7 +24,7 @@ class Voice final : public juce::SynthesiserVoice {
     // this is effectively the constructor
     void setCurrentPlaybackSampleRate(double newRate) override;
 
-    void renderNextBlock(AudioBuffer<float>& outputBuffer,
+    void renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
                          int startSample,
                          int numSamples) override;
 

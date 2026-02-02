@@ -16,13 +16,14 @@
 const std::string DingProcessor::s_volume_id = "volume";
 const std::string DingProcessor::s_volume_name = "Volume";
 
-AudioProcessorValueTreeState::ParameterLayout
+juce::AudioProcessorValueTreeState::ParameterLayout
 DingProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    auto volume_parameter = std::make_unique<AudioParameterFloat>(
-        s_volume_id, s_volume_name, NormalisableRange<float>(0.0f, 1.0f), 0.5f);
+    auto volume_parameter = std::make_unique<juce::AudioParameterFloat>(
+        s_volume_id, s_volume_name, juce::NormalisableRange<float>(0.0f, 1.0f),
+        0.5f);
     params.push_back(std::move(volume_parameter));
 
     return {params.begin(), params.end()};

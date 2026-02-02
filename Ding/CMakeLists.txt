@@ -16,7 +16,6 @@ juce_add_plugin("${TargetName}"
         FORMATS AU VST3 Standalone
         PRODUCT_NAME "${TargetName}"
 )
-juce_generate_juce_header(${TargetName})
 
 target_sources(${TargetName} PRIVATE
         Processor.cpp

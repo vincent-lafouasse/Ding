@@ -64,7 +64,7 @@ void Voice::setCurrentPlaybackSampleRate(double newRate)
     }
 }
 
-void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
+void Voice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {

@@ -1,6 +1,8 @@
 #include "Editor.hpp"
+
 #include <iomanip>
 #include <sstream>
+
 #include "Processor.hpp"
 
 namespace {
@@ -25,7 +27,7 @@ DingEditor::DingEditor(DingProcessor& p)
       m_audioProcessor(p),
       m_volume_label("VolumeLabel", "Volume"),
       m_keyboardComponent(p.m_keyboardState,
-                          KeyboardComponentBase::horizontalKeyboard)
+                          juce::KeyboardComponentBase::horizontalKeyboard)
 {
     setSize(impl::screenWidth, impl::screenHeight);
 

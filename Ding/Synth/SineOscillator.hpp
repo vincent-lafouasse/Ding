@@ -1,9 +1,9 @@
 #pragma once
 
-#include "JuceHeader.h"
-
 #include <cmath>
 #include <cstddef>
+
+#include <juce_core/juce_core.h>
 
 // rotating a phasor around the unit circle using a rotation matrix
 //
