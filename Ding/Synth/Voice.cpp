@@ -68,6 +68,9 @@ float computeDecayCoefficient(float decayMs,
 
     return decayCoeff;
 }
+
+static constexpr float nModesInv =
+    1.0f / static_cast<float>(GlockenspielModalData::nModes);
 }  // namespace impl
 }  // namespace
 
@@ -102,7 +105,7 @@ void Voice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
             mode.osc.advance();
             mode.level *= GlockenspielModalData::relativeDecays[i];
         }
-        sample /= static_cast<float>(s_nModes);
+        sample *= impl::nModesInv;  // normalize using cached 1/N(modes)
 
         const float s = sample * m_level;
 
