@@ -62,9 +62,11 @@ float computeDecayCoefficient(float decayMs,
     // ie k = threshold^(1/n)
     const float threshold = DecibelLookup::fromDb(thresholdDecibel);
 
-    const float decaySamples =
-        (decayMs / 1000.0f) * static_cast<float>(sampleRate);
-    const float decayCoeff = std::powf(threshold, 1.0f / decaySamples);
+    // const float decaySamples =
+    // (decayMs / 1000.0f) * static_cast<float>(sampleRate);
+    const float invDecaySamples =
+        1000.0f / (decayMs * static_cast<float>(sampleRate));
+    const float decayCoeff = std::powf(threshold, invDecaySamples);
 
     return decayCoeff;
 }
