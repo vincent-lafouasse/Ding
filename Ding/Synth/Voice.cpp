@@ -1,5 +1,6 @@
 #include "Voice.hpp"
 
+#include <atomic>
 #include <cmath>
 #include <cstdio>
 #include <numeric>
@@ -29,13 +30,15 @@ static const float silenceThresold = ::fromDecibels(silenceThresoldDecibel);
 // the level at which the env. has _significantly_ decayed
 // makes the decay time more of a tau time constant than a time to silence
 static constexpr float guiDecayThreshold = -30.0f;
+
 // will become a GUI parameter at some point
-static constexpr float guiDecayMs = 1000.0f;
+// so let's make it look like a gui parameter
+static std::atomic<float> guiDecayMs = 1000.0f;
 }  // namespace
 
 namespace {
 float computeDecayCoefficient(float decayMs,
-                              float sampleRate,
+                              double sampleRate,
                               float thresholdDecibel)
 {
     // adsr[n+1] = k * adsr[n]
@@ -45,18 +48,15 @@ float computeDecayCoefficient(float decayMs,
     // ie k = threshold^(1/n)
     const float threshold = ::fromDecibels(thresholdDecibel);
 
-    const float decaySamples = (decayMs / 1000.0f) * sampleRate;
+    const float decaySamples =
+        (decayMs / 1000.0f) * static_cast<float>(sampleRate);
     const float decayCoeff = std::powf(threshold, 1.0f / decaySamples);
 
     return decayCoeff;
 }
 }  // namespace
 
-void Voice::setCurrentPlaybackSampleRate(double newRate)
-{
-    m_decayCoeff = ::computeDecayCoefficient(
-        guiDecayMs, static_cast<float>(newRate), ::guiDecayThreshold);
-}
+void Voice::setCurrentPlaybackSampleRate(double newRate) {}
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
@@ -66,6 +66,10 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
         clearCurrentNote();
         return;
     }
+
+    const float decayMs = guiDecayMs.load(std::memory_order_relaxed);
+    m_decayCoeff = ::computeDecayCoefficient(decayMs, getSampleRate(),
+                                             ::guiDecayThreshold);
 
     const int channels = outputBuffer.getNumChannels();
 
