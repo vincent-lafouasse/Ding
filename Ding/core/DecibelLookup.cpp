@@ -10,7 +10,7 @@ float DecibelLookup::fromDb(float db)
         return DL::data[DL::dataSize - 1];
     }
 
-    const float floatIndex = (db + DL::minDb) / DL::step;
+    const float floatIndex = (db + DL::minDb) * DL::invStep;
 
     const std::size_t i = static_cast<std::size_t>(floatIndex);
     const float frac = floatIndex - static_cast<float>(i);

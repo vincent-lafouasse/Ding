@@ -15,5 +15,8 @@ class DecibelLookup {
         (DecibelLookup::maxDb - DecibelLookup::minDb) /
         static_cast<float>(DecibelLookup::dataSize - 1);
 
+    // cached to avoid float division
+    static constexpr float invStep = 1.0f / DecibelLookup::step;
+
     static const std::array<float, dataSize> data;
 };
