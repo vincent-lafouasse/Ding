@@ -18,5 +18,5 @@ class DecibelLookup {
     // cached to avoid float division
     static constexpr float invStep = 1.0f / DecibelLookup::step;
 
-    static const std::array<float, dataSize> data;
+    alignas(4096) static const std::array<float, dataSize> data;
 };
