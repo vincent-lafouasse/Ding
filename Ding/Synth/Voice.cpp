@@ -142,6 +142,7 @@ void Voice::startNote(const int midiNote,
         const float freq = fundamental * ratios[i];
         mode.osc.setFrequency(freq);
         mode.osc.reset();
+        // brickwall LPF
         mode.level = (freq >= impl::hfHardCutoff)
                          ? 0.0f
                          : GlockenspielModalData::initialAmplitude[i];
