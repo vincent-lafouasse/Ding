@@ -17,6 +17,7 @@ static constexpr std::array<float, nModes> frequencyRatios = {
 }  // namespace GlockenspielModalData
 
 namespace {
+namespace impl {
 float fromDecibels(float db)
 {
     return std::powf(10.0f, db / 20.0f);
@@ -25,7 +26,7 @@ float fromDecibels(float db)
 // determines when the voice is absolutely silent and can be returned to the
 // voice pool
 static constexpr float silenceThresoldDecibel = -60.0f;
-static const float silenceThresold = ::fromDecibels(silenceThresoldDecibel);
+static const float silenceThresold = impl::fromDecibels(silenceThresoldDecibel);
 
 // the level at which the env. has _significantly_ decayed
 // makes the decay time more of a tau time constant than a time to silence
@@ -34,9 +35,7 @@ static constexpr float guiDecayThreshold = -30.0f;
 // will become a GUI parameter at some point
 // so let's make it look like a gui parameter
 static std::atomic<float> guiDecayMs = 1000.0f;
-}  // namespace
 
-namespace {
 float computeDecayCoefficient(float decayMs,
                               double sampleRate,
                               float thresholdDecibel)
@@ -46,7 +45,7 @@ float computeDecayCoefficient(float decayMs,
     // we're looking for k such that adsr[n] = k^n = threshold
     // with n = decaySeconds * sampleRate
     // ie k = threshold^(1/n)
-    const float threshold = ::fromDecibels(thresholdDecibel);
+    const float threshold = impl::fromDecibels(thresholdDecibel);
 
     const float decaySamples =
         (decayMs / 1000.0f) * static_cast<float>(sampleRate);
@@ -54,6 +53,7 @@ float computeDecayCoefficient(float decayMs,
 
     return decayCoeff;
 }
+}  // namespace impl
 }  // namespace
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
@@ -68,14 +68,14 @@ void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
                             const int numSamples)
 {
-    if (m_level <= ::silenceThresold) {
+    if (m_level <= impl::silenceThresold) {
         clearCurrentNote();
         return;
     }
 
-    const float decayMs = guiDecayMs.load(std::memory_order_relaxed);
-    m_decayCoeff =
-        ::computeDecayCoefficient(decayMs, m_sampleRate, ::guiDecayThreshold);
+    const float decayMs = impl::guiDecayMs.load(std::memory_order_relaxed);
+    m_decayCoeff = impl::computeDecayCoefficient(decayMs, m_sampleRate,
+                                                 impl::guiDecayThreshold);
 
     const int channels = outputBuffer.getNumChannels();
 

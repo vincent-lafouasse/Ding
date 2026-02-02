@@ -4,6 +4,7 @@
 #include "Processor.hpp"
 
 namespace {
+namespace impl {
 constexpr float aspectRatio = 6.4f;
 constexpr int screenWidth = 1000;
 constexpr int screenHeight = static_cast<int>(screenWidth / aspectRatio);
@@ -15,6 +16,7 @@ constexpr int highestNote = c0 + 7 * 12;
 constexpr int numWhiteKeys = 36;
 constexpr int keyWidth = 23;
 constexpr int keyboardWidth = numWhiteKeys * keyWidth;
+}  // namespace impl
 }  // namespace
 
 //==============================================================================
@@ -25,7 +27,7 @@ DingEditor::DingEditor(DingProcessor& p)
       m_keyboardComponent(p.m_keyboardState,
                           KeyboardComponentBase::horizontalKeyboard)
 {
-    setSize(::screenWidth, ::screenHeight);
+    setSize(impl::screenWidth, impl::screenHeight);
 
     setupKeyboard();
     setupGainKnob();
@@ -39,8 +41,8 @@ void DingEditor::setupKeyboard()
     addAndMakeVisible(m_keyboardComponent);
     m_keyboardComponent.setBlackNoteLengthProportion(0.6f);
 
-    m_keyboardComponent.setAvailableRange(::lowestNote, ::highestNote);
-    m_keyboardComponent.setKeyWidth(::keyWidth);
+    m_keyboardComponent.setAvailableRange(impl::lowestNote, impl::highestNote);
+    m_keyboardComponent.setKeyWidth(impl::keyWidth);
     m_keyboardComponent.setOctaveForMiddleC(4);
 }
 
@@ -73,7 +75,7 @@ void DingEditor::resized()
 {
     juce::Rectangle<int> area = getLocalBounds();
 
-    auto keyboardPanel = area.removeFromRight(::keyboardWidth);
+    auto keyboardPanel = area.removeFromRight(impl::keyboardWidth);
     auto sidePanel = area;
 
     m_keyboardComponent.setBounds(keyboardPanel);
