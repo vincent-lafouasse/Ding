@@ -77,16 +77,19 @@ static constexpr float nModesInv =
 // glockenspiels plays pretty high
 // hard cut LPF: do not render stuff that will alias
 // soft knee LPF: HF modes are hard to excite and decay very fast
-static constexpr float hfHardCutoff = 18.0f * 1000.0f;
+static constexpr float hfHardCut = 18.0f * 1000.0f;
 static constexpr float hfSoftKnee = 10.0f * 1000.0f;
 
+// exponential rolloff + hard cut
 // std::expf is fine, this should only be called on NoteOn
 float hfAttenuation(float freq)
 {
-    (void)hfSoftKnee;
-
-    if (freq >= hfHardCutoff) {
+    if (freq >= hfHardCut) {
         return 0.0f;
+    } else if (freq >= hfSoftKnee) {
+        // scale [softKnee, hardCut] to [0, 1]
+        float t = (freq - hfSoftKnee) / (hfHardCut - hfSoftKnee);
+        return std::expf(-3.0f * t);  // e^(-3) ≈ 0.05 at hardCut
     } else {
         return 1.0f;
     }
