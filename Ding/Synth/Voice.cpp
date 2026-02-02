@@ -18,7 +18,7 @@ static constexpr std::array<float, nModes> frequencyRatios = {
 // the simply supported beams at 22.4% select the first and fifth partials
 //
 // in a perfect world, the first and fifth partials ring out forever but they
-// actually lose energy to acoustic radiation (we hear them)
+// actually lose energy to acoustic radiation (i.e. we hear them)
 static constexpr std::array<float, nModes> relativeDecays = {
     1.0f, 0.95f, 0.9f, 0.7f, 1.0f, 0.5f,
 };
