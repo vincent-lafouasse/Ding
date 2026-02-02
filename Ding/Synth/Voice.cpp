@@ -34,14 +34,16 @@ static constexpr float guiDecayMs = 1000.0f;
 }  // namespace
 
 namespace {
-float computeDecayCoefficient(float decayMs, float sampleRate)
+float computeDecayCoefficient(float decayMs,
+                              float sampleRate,
+                              float thresholdDecibel)
 {
     // adsr[n+1] = k * adsr[n]
     // ie adsr[n] = adsr[0] k^n = k^n
     // we're looking for k such that adsr[n] = k^n = threshold
     // with n = decaySeconds * sampleRate
     // ie k = threshold^(1/n)
-    const float threshold = ::fromDecibels(::guiDecayThreshold);
+    const float threshold = ::fromDecibels(thresholdDecibel);
 
     const float decaySamples = (decayMs / 1000.0f) * sampleRate;
     const float decayCoeff = std::powf(threshold, 1.0f / decaySamples);
@@ -52,8 +54,8 @@ float computeDecayCoefficient(float decayMs, float sampleRate)
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
-    m_decayCoeff =
-        ::computeDecayCoefficient(guiDecayMs, static_cast<float>(newRate));
+    m_decayCoeff = ::computeDecayCoefficient(
+        guiDecayMs, static_cast<float>(newRate), ::guiDecayThreshold);
 }
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
