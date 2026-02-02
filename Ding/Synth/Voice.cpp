@@ -21,9 +21,14 @@ float fromDecibels(float db)
     return std::powf(10.0f, db / 20.0f);
 }
 
+// determines when the voice is absolutely silent and can be returned to the
+// voice pool
 static constexpr float silenceThresoldDecibel = -60.0f;
 static const float silenceThresold = ::fromDecibels(silenceThresoldDecibel);
 
+// the level at which the env. has _significantly_ decayed
+// makes the decay time more of a tau time constant than a time to silence
+static constexpr float guiDecayThreshold = -30.0f;
 // will become a GUI parameter at some point
 static constexpr float guiDecayMs = 1000.0f;
 }  // namespace
@@ -33,7 +38,7 @@ float computeDecayCoefficient(float decayMs, float sampleRate)
 {
     // we're looking for k such that k^n = threshold with n = decaySeconds /
     // sampleRate ie k = threshold^(1/n)
-    const float threshold = ::fromDecibels(-30.0f);
+    const float threshold = ::fromDecibels(::guiDecayThreshold);
 
     const float decaySamples = (decayMs / 1000.0f) * sampleRate;
     const float decayCoeff = std::powf(threshold, 1.0f / decaySamples);
