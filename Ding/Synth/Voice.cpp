@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstdio>
 
+#include "core/DecibelLookup.hpp"
+
 namespace GlockenspielModalData {
 static constexpr std::array<float, nModes> frequencyRatios = {
     1.0f,
@@ -35,15 +37,11 @@ static constexpr std::array<float, nModes> initialAmplitude = {
 
 namespace {
 namespace impl {
-float fromDecibels(float db)
-{
-    return std::powf(10.0f, db / 20.0f);
-}
-
 // determines when the voice is absolutely silent and can be returned to the
 // voice pool
 static constexpr float silenceThresoldDecibel = -60.0f;
-static const float silenceThresold = impl::fromDecibels(silenceThresoldDecibel);
+static const float silenceThresold =
+    DecibelLookup::fromDb(silenceThresoldDecibel);
 
 // the level at which the env. has _significantly_ decayed
 // makes the decay time more of a tau time constant than a time to silence
@@ -62,7 +60,7 @@ float computeDecayCoefficient(float decayMs,
     // we're looking for k such that adsr[n] = k^n = threshold
     // with n = decaySeconds * sampleRate
     // ie k = threshold^(1/n)
-    const float threshold = impl::fromDecibels(thresholdDecibel);
+    const float threshold = DecibelLookup::fromDb(thresholdDecibel);
 
     const float decaySamples =
         (decayMs / 1000.0f) * static_cast<float>(sampleRate);
