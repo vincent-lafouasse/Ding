@@ -2049,4 +2049,4 @@ static constexpr std::array<float, 2048> db_lut_data = {
     3.93300036e+00f,  //   11.89 dB
     3.95696303e+00f,  //   11.95 dB
     3.98107171e+00f,  //   12.00 dB
-}
+};
