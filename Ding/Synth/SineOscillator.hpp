@@ -24,13 +24,21 @@ struct SineOscillator {
     float m_sinInc = 0.0f;
     float m_cosInc = 1.0f;
 
+    float m_sampleRate = 44100.0f;  // safeguard value but you should _really_
+                                    // call setSampleRate before doing anything
+
     size_t m_renormTimer = 0;
     static constexpr size_t s_renormThreshold = 256;  // renorm every _ samples
 
-    void setFrequency(float freq, double sampleRate)
+    void setSampleRate(double sampleRate_)
+    {
+        m_sampleRate = static_cast<float>(sampleRate_);
+    }
+
+    void setFrequency(float freq)
     {
         const float phase_increment =
-            juce::MathConstants<float>::twoPi * freq / (float)sampleRate;
+            juce::MathConstants<float>::twoPi * freq / m_sampleRate;
         m_cosInc = std::cos(phase_increment);
         m_sinInc = std::sin(phase_increment);
     }

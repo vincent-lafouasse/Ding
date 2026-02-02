@@ -56,7 +56,12 @@ float computeDecayCoefficient(float decayMs,
 }
 }  // namespace
 
-void Voice::setCurrentPlaybackSampleRate(double newRate) {}
+void Voice::setCurrentPlaybackSampleRate(double newRate)
+{
+    for (auto& osc : m_oscillators) {
+        osc.setSampleRate(newRate);
+    }
+}
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
                             const int startSample,
@@ -105,7 +110,7 @@ void Voice::startNote(const int midiNote,
         GlockenspielModalData::frequencyRatios;
 
     for (std::size_t i = 0; i < s_nModes; i++) {
-        m_oscillators[i].setFrequency(fundamental * ratios[i], getSampleRate());
+        m_oscillators[i].setFrequency(fundamental * ratios[i]);
         m_oscillators[i].reset();
     }
 
