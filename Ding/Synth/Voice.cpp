@@ -36,8 +36,11 @@ static constexpr float guiDecayMs = 1000.0f;
 namespace {
 float computeDecayCoefficient(float decayMs, float sampleRate)
 {
-    // we're looking for k such that k^n = threshold with n = decaySeconds /
-    // sampleRate ie k = threshold^(1/n)
+    // adsr[n+1] = k * adsr[n]
+    // ie adsr[n] = adsr[0] k^n = k^n
+    // we're looking for k such that adsr[n] = k^n = threshold
+    // with n = decaySeconds * sampleRate
+    // ie k = threshold^(1/n)
     const float threshold = ::fromDecibels(::guiDecayThreshold);
 
     const float decaySamples = (decayMs / 1000.0f) * sampleRate;
