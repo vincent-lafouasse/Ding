@@ -73,6 +73,10 @@ float computeDecayCoefficient(float decayMs,
 
 static constexpr float nModesInv =
     1.0f / static_cast<float>(GlockenspielModalData::nModes);
+
+// glockenspiels plays pretty high
+// do not render stuff that will alias
+static constexpr float hfHardCutoff = 18000.0f;
 }  // namespace impl
 }  // namespace
 
@@ -135,9 +139,12 @@ void Voice::startNote(const int midiNote,
 
     for (std::size_t i = 0; i < s_nModes; i++) {
         Mode& mode = m_modes[i];
-        mode.osc.setFrequency(fundamental * ratios[i]);
+        const float freq = fundamental * ratios[i];
+        mode.osc.setFrequency(freq);
         mode.osc.reset();
-        mode.level = GlockenspielModalData::initialAmplitude[i];
+        mode.level = (freq >= impl::hfHardCutoff)
+                         ? 0.0f
+                         : GlockenspielModalData::initialAmplitude[i];
     }
 
     m_level = velocity;
