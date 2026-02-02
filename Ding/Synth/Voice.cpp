@@ -13,8 +13,6 @@ static constexpr std::array<float, nModes> frequencyRatios = {
     13.34429142562536f,
     18.820878932628247f,
 };
-
-static constexpr float decayMs = 1000.0f;
 }  // namespace GlockenspielModalData
 
 namespace {
@@ -25,6 +23,9 @@ float fromDecibels(float db)
 
 static constexpr float silenceThresoldDecibel = -60.0f;
 static const float silenceThresold = ::fromDecibels(silenceThresoldDecibel);
+
+// will become a GUI parameter at some point
+static constexpr float guiDecayMs = 1000.0f;
 }  // namespace
 
 namespace {
@@ -43,8 +44,8 @@ float computeDecayCoefficient(float decayMs, float sampleRate)
 
 void Voice::setCurrentPlaybackSampleRate(double newRate)
 {
-    m_decayCoeff = ::computeDecayCoefficient(GlockenspielModalData::decayMs,
-                                             static_cast<float>(newRate));
+    m_decayCoeff =
+        ::computeDecayCoefficient(guiDecayMs, static_cast<float>(newRate));
 }
 
 void Voice::renderNextBlock(AudioBuffer<float>& outputBuffer,
