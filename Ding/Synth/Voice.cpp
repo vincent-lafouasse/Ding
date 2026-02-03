@@ -43,7 +43,7 @@ static constexpr float silenceThresoldDecibel = -60.0f;
 static const float silenceThresold =
     DecibelLookup::fromDb(silenceThresoldDecibel);
 
-// the level at which the env. has _significantly_ decayed
+// the level at which the envelope has _significantly_ decayed
 // makes the decay time more of a tau time constant than a time to silence
 static constexpr float guiDecayThreshold = -30.0f;
 
