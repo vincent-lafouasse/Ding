@@ -49,7 +49,7 @@ static constexpr float guiDecayThreshold = -30.0f;
 
 // will become a GUI parameter at some point
 // so let's make it look like a gui parameter
-static std::atomic<float> guiDecayMs = 1000.0f;
+static std::atomic<float> guiDecayMs = 3000.0f;
 
 float computeDecayCoefficient(float decayMs,
                               double sampleRate,
