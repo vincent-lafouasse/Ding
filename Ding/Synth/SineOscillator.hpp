@@ -67,7 +67,7 @@ struct SineOscillator {
 
         m_renormTimer++;
         if (m_renormTimer >= s_renormThreshold) {
-            const float norm = std::sqrt(m_sinv * m_sinv + m_cosv * m_cosv);
+            const float norm = std::hypot(m_sinv, m_cosv);
             m_sinv /= norm;
             m_cosv /= norm;
             m_renormTimer = 0;
