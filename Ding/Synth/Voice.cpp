@@ -74,7 +74,7 @@ float computeDecayCoefficient(float decayMs,
 static constexpr float nModesInv =
     1.0f / static_cast<float>(GlockenspielModalData::nModes);
 
-// glockenspiels plays pretty high
+// glockenspiels play pretty high
 // hard cut LPF: do not render stuff that will alias
 // soft knee LPF: HF modes are hard to excite and decay very fast
 static constexpr float hfHardCut = 18.0f * 1000.0f;
